@@ -28,6 +28,7 @@
 # It could also be set in server configuration.
 - command: mysql -NBe "SHOW VARIABLES LIKE 'super_read_only';"
   register: mysql_super_read_only_test
+  changed_when: false
 - set_fact:
     mysql_super_read_only: "{{ 'super_read_only\tON' in mysql_super_read_only_test.stdout }}"
 
