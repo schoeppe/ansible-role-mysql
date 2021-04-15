@@ -20,7 +20,22 @@
 
 # Configure MySQL.
 - include_tasks: configure.yml
-- include_tasks: secure-installation.yml
-- include_tasks: databases.yml
-- include_tasks: users.yml
+
+# Determine if MySQL is running with the --super-read-only option (super_read_only variable).
+# https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_super_read_only
+# The super_read_only variable is set to ON when the server is part of a replicaset or replication group and not
+# allowed to accept client writes (secondary members).
+# It could also be set in server configuration.
+- command: mysql -NBe "SHOW VARIABLES LIKE 'super_read_only';"
+  register: mysql_super_read_only_test
+- set_fact:
+    mysql_super_read_only: "{{ 'super_read_only\tON' in mysql_super_read_only_test.stdout }}"
+
+# Only attempt to make changes when the server is not running with --super-read-only option.
+- block:
+    - include_tasks: secure-installation.yml
+    - include_tasks: databases.yml
+    - include_tasks: users.yml
+  when: not mysql_super_read_only
+
 - include_tasks: replication.yml
