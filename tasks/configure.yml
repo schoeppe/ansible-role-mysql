@@ -32,6 +32,15 @@
     group: root
     mode: 0644
     force: "{{ item.force | default(False) }}"
+  when: item.state | default('present') == 'present'
+  with_items: "{{ mysql_config_include_files }}"
+  notify: restart mysql
+
+- name: Remove my.cnf override files from include directory.
+  file:
+    dest: "{{ mysql_config_include_dir }}/{{ item.src | basename }}"
+    state: absent
+  when: item.state | default('present') == 'absent'
   with_items: "{{ mysql_config_include_files }}"
   notify: restart mysql
 
