@@ -1,4 +1,7 @@
 ---
 - name: restart mysql
-  service: "name={{ mysql_daemon }} state=restarted sleep=5"
+  ansible.builtin.service:
+    name: "{{ mysql_daemon }}"
+    state: restarted
+    sleep: 5
   throttle: "{{ mysql_restart_throttle }}"

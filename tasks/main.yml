@@ -1,42 +1,42 @@
 ---
 # Variable configuration.
-- include_tasks: variables.yml
+- ansible.builtin.include_tasks: variables.yml
 
 # Setup/install tasks.
-- include_tasks: setup-RedHat.yml
+- ansible.builtin.include_tasks: setup-RedHat.yml
   when: ansible_os_family == 'RedHat'
 
-- include_tasks: setup-Debian.yml
+- ansible.builtin.include_tasks: setup-Debian.yml
   when: ansible_os_family == 'Debian'
 
-- include_tasks: setup-Archlinux.yml
+- ansible.builtin.include_tasks: setup-Archlinux.yml
   when: ansible_os_family == 'Archlinux'
 
 - name: Check if MySQL packages were installed.
-  set_fact:
+  ansible.builtin.set_fact:
     mysql_install_packages: "{{ (rh_mysql_install_packages is defined and rh_mysql_install_packages.changed)
       or (deb_mysql_install_packages is defined and deb_mysql_install_packages.changed)
       or (arch_mysql_install_packages is defined and arch_mysql_install_packages.changed) }}"
 
 # Configure MySQL.
-- include_tasks: configure.yml
+- ansible.builtin.include_tasks: configure.yml
 
 # Determine if MySQL is running with the --super-read-only option (super_read_only variable).
 # https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_super_read_only
 # The super_read_only variable is set to ON when the server is part of a replicaset or replication group and not
 # allowed to accept client writes (secondary members).
 # It could also be set in server configuration.
-- command: mysql -NBe "SHOW VARIABLES LIKE 'super_read_only';"
+- ansible.builtin.command: mysql -NBe "SHOW VARIABLES LIKE 'super_read_only';"
   register: mysql_super_read_only_test
   changed_when: false
-- set_fact:
+- ansible.builtin.set_fact:
     mysql_super_read_only: "{{ 'super_read_only\tON' in mysql_super_read_only_test.stdout }}"
 
 # Only attempt to make changes when the server is not running with --super-read-only option.
 - block:
-    - include_tasks: secure-installation.yml
-    - include_tasks: databases.yml
-    - include_tasks: users.yml
+    - ansible.builtin.include_tasks: secure-installation.yml
+    - ansible.builtin.include_tasks: databases.yml
+    - ansible.builtin.include_tasks: users.yml
   when: not mysql_super_read_only
 
-- include_tasks: replication.yml
+- ansible.builtin.include_tasks: replication.yml

@@ -6,7 +6,9 @@
     password: "{{ item.password }}"
     priv: "{{ item.priv | default('*.*:USAGE') }}"
     state: "{{ item.state | default('present') }}"
-    append_privs: "{{ item.append_privs | default('no') }}"
-    encrypted: "{{ item.encrypted | default('no') }}"
+    append_privs: "{{ item.append_privs | default(false) }}"
+    encrypted: "{{ item.encrypted | default(false) }}"
+    column_case_sensitive: "{{ item.case_sensitive | default(false) }}"
+    update_password: "{{ item.update_password | default('always') }}"
   with_items: "{{ mysql_users }}"
-  no_log: true
+  no_log: "{{ mysql_hide_passwords }}"
